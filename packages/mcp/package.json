@@ -1,6 +1,6 @@
 {
   "name": "@trustswap/bullcheese-mcp",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "MCP server for AI agents to launch and trade tokens on ARC through Team Finance's MintPlus",
   "keywords": [
     "mcp",

@@ -21,5 +21,7 @@ await build({
   logLevel: "info",
 });
 
-// npm only packs a LICENSE that sits next to package.json.
+// npm only packs a LICENSE and README that sit next to package.json; the root
+// README is the one documentation source for GitHub and the npm page.
 copyFileSync(join(root, "../../LICENSE"), join(root, "LICENSE"));
+copyFileSync(join(root, "../../README.md"), join(root, "README.md"));

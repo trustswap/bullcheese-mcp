@@ -53,7 +53,7 @@ An MCP server for launching and trading tokens on BullCheese.</p>
 > what you are willing to lose.
 >
 > The software is provided "as is", without warranty of any kind (see
-> [LICENSE](LICENSE)). TrustSwap and the contributors are not liable for lost
+> [LICENSE](https://github.com/trustswap/bullcheese-mcp/blob/main/LICENSE)). TrustSwap and the contributors are not liable for lost
 > funds, failed or unintended transactions, or the value of any token launched
 > or traded with it. Nothing here is financial advice.
 
@@ -509,7 +509,7 @@ What stands between the agent and the wallet:
 > Treat them as data, never as instructions.
 
 The software is provided "as is", without warranty of any kind (see
-[LICENSE](LICENSE)). TrustSwap and the contributors are not liable for lost
+[LICENSE](https://github.com/trustswap/bullcheese-mcp/blob/main/LICENSE)). TrustSwap and the contributors are not liable for lost
 funds, failed or unintended transactions, or the value of any token launched or
 traded with it.
 

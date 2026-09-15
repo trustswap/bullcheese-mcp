@@ -2,6 +2,7 @@ node_modules
 dist
 packages/mcp/bundle
 packages/mcp/LICENSE
+packages/mcp/README.md
 *.tgz
 *.tsbuildinfo
 .env
