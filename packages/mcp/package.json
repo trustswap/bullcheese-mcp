@@ -1,0 +1,26 @@
+{
+  "name": "@trustswap/bullcheese-mcp",
+  "version": "0.1.0",
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "bin": "./dist/bin/stdio.js",
+  "scripts": {
+    "build": "tsc -b",
+    "start:stdio": "tsx --env-file-if-exists=../../.env src/bin/stdio.ts",
+    "start:http": "tsx --env-file-if-exists=../../.env src/bin/http.ts"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/node": "2.0.0",
+    "@modelcontextprotocol/server": "2.0.0",
+    "@trustswap/bullcheese-core": "workspace:*",
+    "@trustswap/bullcheese-policy": "workspace:*",
+    "@trustswap/bullcheese-signer": "workspace:*",
+    "viem": "^2.56.3",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "tsx": "^4"
+  }
+}
