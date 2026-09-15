@@ -37,6 +37,7 @@
 An MCP server for launching and trading tokens on BullCheese.</p>
 
 <p>
+<a href="https://www.npmjs.com/package/@trustswap/bullcheese-mcp"><img src="https://img.shields.io/npm/v/@trustswap/bullcheese-mcp?style=flat-square" alt="npm"></a>
 <img src="https://img.shields.io/badge/MCP-server-6E56CF?style=flat-square" alt="MCP server">
 <img src="https://img.shields.io/badge/node-%E2%89%A5%2024-5FA04E?style=flat-square&logo=nodedotjs&logoColor=white" alt="Node 24+">
 <img src="https://img.shields.io/badge/tools-16-0B7285?style=flat-square" alt="16 tools">
@@ -67,9 +68,7 @@ An MCP server for launching and trading tokens on BullCheese.</p>
 
 | Need | Check | If missing |
 |:--|:--|:--|
-| **Node 24+** | `node --version` | `brew install node`, or `nvm install 24 && nvm use 24` |
-| **Git** | `git --version` | `brew install git`, or Xcode command line tools |
-| **Corepack** | ships with Node 24 | `corepack enable` (run once) |
+| **Node 24+** (includes `npx`) | `node --version` | `brew install node`, or `nvm install 24 && nvm use 24` |
 
 > [!IMPORTANT]
 > Node 24 is a hard requirement, not a suggestion — the audit store uses
@@ -77,48 +76,27 @@ An MCP server for launching and trading tokens on BullCheese.</p>
 
 </details>
 
----
-
-### Step 1 — Build it
-
-Not on npm yet, so build from source once:
-
-```bash
-git clone https://github.com/trustswap/bullcheese-mcp.git ~/bullcheese-mcp
-cd ~/bullcheese-mcp
-corepack enable
-yarn install
-yarn build
-```
-
-Confirm the entry point exists — this is the path every client needs:
-
-```bash
-ls -l ~/bullcheese-mcp/packages/mcp/dist/bin/stdio.js
-```
-
-> [!TIP]
-> Note the **absolute** path. No MCP client expands `~`, so you'll paste the full
-> `/Users/you/bullcheese-mcp/...` form below.
+The server is published on npm as
+[`@trustswap/bullcheese-mcp`](https://www.npmjs.com/package/@trustswap/bullcheese-mcp).
+Clients start it with `npx`, so there is nothing to clone or build.
 
 ---
 
-### Step 2 — Get a wallet
+### Step 1 — Get a wallet
 
-The server signs with a key you provide. Generate a fresh throwaway one:
+The server signs with a key you provide. Generate a fresh throwaway one in a
+temporary folder:
 
 ```bash
-cd ~/bullcheese-mcp
-node --input-type=module -e '
-import { randomBytes } from "node:crypto";
-import { privateKeyToAccount } from "viem/accounts";
-const key = "0x" + randomBytes(32).toString("hex");
+cd "$(mktemp -d)" && npm install --silent viem && node --input-type=module -e '
+import { generatePrivateKey, privateKeyToAccount } from "viem/accounts";
+const key = generatePrivateKey();
 console.log("key:     " + key);
 console.log("address: " + privateKeyToAccount(key).address);
 '
 ```
 
-Save the key — you'll paste it in Step 4. Fund the address with USDC on ARC
+Save the key — you'll paste it in Step 3. Fund the address with USDC on ARC
 mainnet: it pays for gas and is the pair token every launch and swap spends.
 
 > [!CAUTION]
@@ -131,23 +109,24 @@ can't launch or trade until the address has gas.
 
 ---
 
-### Step 3 — Verify the server before wiring anything
+### Step 2 — Verify the server before wiring anything
 
-Run the protocol handshake by hand. This catches a broken build or wrong Node
-version *before* a client hides the error behind a generic failure:
+Run the protocol handshake by hand. This catches a wrong Node version or a
+failed download *before* a client hides the error behind a generic failure, and
+it downloads the package into npx's cache, so your client's first start is fast:
 
 ```bash
-cd ~/bullcheese-mcp
 printf '%s\n' \
   '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2024-11-05","capabilities":{},"clientInfo":{"name":"probe","version":"0"}}}' \
   '{"jsonrpc":"2.0","method":"notifications/initialized"}' \
   '{"jsonrpc":"2.0","id":2,"method":"tools/list"}' \
 | env BULLCHEESE_LOCAL_PRIVATE_KEY=0xYOUR_KEY BULLCHEESE_AUDIT_DB=:memory: \
-      node packages/mcp/dist/bin/stdio.js 2>/dev/null \
+      npx -y @trustswap/bullcheese-mcp 2>/dev/null \
 | tail -1 | python3 -c "import sys,json;print('tools:',len(json.load(sys.stdin)['result']['tools']))"
 ```
 
-Expected output:
+The first run downloads the package and its dependencies, which can take a
+minute. Expected output:
 
 ```
 tools: 16
@@ -157,7 +136,7 @@ Anything else means stop here — a client won't fix it.
 
 ---
 
-### Step 4 — Connect your agent
+### Step 3 — Connect your agent
 
 <details open>
 <summary><b>Claude Code</b></summary>
@@ -167,7 +146,7 @@ Anything else means stop here — a client won't fix it.
 ```bash
 claude mcp add bullcheese \
   -e BULLCHEESE_LOCAL_PRIVATE_KEY=0xYOUR_KEY \
-  -- node $HOME/bullcheese-mcp/packages/mcp/dist/bin/stdio.js
+  -- npx -y @trustswap/bullcheese-mcp
 ```
 
 Verify:
@@ -201,8 +180,8 @@ it — don't replace it, or you'll wipe your settings:
 {
   "mcpServers": {
     "bullcheese": {
-      "command": "node",
-      "args": ["/Users/you/bullcheese-mcp/packages/mcp/dist/bin/stdio.js"],
+      "command": "npx",
+      "args": ["-y", "@trustswap/bullcheese-mcp"],
       "env": { "BULLCHEESE_LOCAL_PRIVATE_KEY": "0xYOUR_KEY" }
     }
   }
@@ -238,11 +217,10 @@ In your Hermes config:
 ```yaml
 mcp_servers:
   bullcheese:
-    command: "node"
-    args: ["/Users/you/bullcheese-mcp/packages/mcp/dist/bin/stdio.js"]
+    command: "npx"
+    args: ["-y", "@trustswap/bullcheese-mcp"]
     env:
       BULLCHEESE_LOCAL_PRIVATE_KEY: "${BULLCHEESE_LOCAL_PRIVATE_KEY}"
-      BULLCHEESE_RPC_5042: "${BULLCHEESE_RPC_5042}"
       BULLCHEESE_PERSONA_ID: "my-agent"
 ```
 
@@ -279,8 +257,8 @@ Codex uses TOML, not JSON. In `~/.codex/config.toml`:
 
 ```toml
 [mcp_servers.bullcheese]
-command = "node"
-args = ["/Users/you/bullcheese-mcp/packages/mcp/dist/bin/stdio.js"]
+command = "npx"
+args = ["-y", "@trustswap/bullcheese-mcp"]
 
 [mcp_servers.bullcheese.env]
 BULLCHEESE_LOCAL_PRIVATE_KEY = "0xYOUR_KEY"
@@ -301,8 +279,8 @@ the flat `mcpServers` key other clients use:
   "mcp": {
     "servers": {
       "bullcheese": {
-        "command": "node",
-        "args": ["/Users/you/bullcheese-mcp/packages/mcp/dist/bin/stdio.js"],
+        "command": "npx",
+        "args": ["-y", "@trustswap/bullcheese-mcp"],
         "env": { "BULLCHEESE_LOCAL_PRIVATE_KEY": "0xYOUR_KEY" }
       }
     }
@@ -331,8 +309,8 @@ In `~/.gemini/settings.json`:
 {
   "mcpServers": {
     "bullcheese": {
-      "command": "node",
-      "args": ["/Users/you/bullcheese-mcp/packages/mcp/dist/bin/stdio.js"],
+      "command": "npx",
+      "args": ["-y", "@trustswap/bullcheese-mcp"],
       "env": { "BULLCHEESE_LOCAL_PRIVATE_KEY": "$BULLCHEESE_LOCAL_PRIVATE_KEY" },
       "timeout": 30000
     }
@@ -359,8 +337,8 @@ extensions:
   bullcheese:
     name: bullcheese
     type: stdio
-    cmd: node
-    args: ["/Users/you/bullcheese-mcp/packages/mcp/dist/bin/stdio.js"]
+    cmd: npx
+    args: ["-y", "@trustswap/bullcheese-mcp"]
     envs:
       BULLCHEESE_LOCAL_PRIVATE_KEY: "0xYOUR_KEY"
     enabled: true
@@ -381,8 +359,8 @@ In `settings.json`:
   "context_servers": {
     "bullcheese": {
       "source": "custom",
-      "command": "node",
-      "args": ["/Users/you/bullcheese-mcp/packages/mcp/dist/bin/stdio.js"],
+      "command": "npx",
+      "args": ["-y", "@trustswap/bullcheese-mcp"],
       "env": { "BULLCHEESE_LOCAL_PRIVATE_KEY": "0xYOUR_KEY" }
     }
   }
@@ -411,7 +389,7 @@ block `environment`. In `opencode.json`:
   "mcp": {
     "bullcheese": {
       "type": "local",
-      "command": ["node", "/Users/you/bullcheese-mcp/packages/mcp/dist/bin/stdio.js"],
+      "command": ["npx", "-y", "@trustswap/bullcheese-mcp"],
       "environment": { "BULLCHEESE_LOCAL_PRIVATE_KEY": "$BULLCHEESE_LOCAL_PRIVATE_KEY" },
       "enabled": true
     }
@@ -451,8 +429,8 @@ VS Code uses `servers`, **not** `mcpServers`, and wants an explicit `type`. In
   "servers": {
     "bullcheese": {
       "type": "stdio",
-      "command": "node",
-      "args": ["/Users/you/bullcheese-mcp/packages/mcp/dist/bin/stdio.js"],
+      "command": "npx",
+      "args": ["-y", "@trustswap/bullcheese-mcp"],
       "env": { "BULLCHEESE_LOCAL_PRIVATE_KEY": "0xYOUR_KEY" }
     }
   }
@@ -466,7 +444,7 @@ VS Code uses `servers`, **not** `mcpServers`, and wants an explicit `type`. In
 
 <br>
 
-Run `node <path>/packages/mcp/dist/bin/stdio.js` with the environment from
+Run `npx -y @trustswap/bullcheese-mcp` with the environment from
 [Configuration](#configuration).
 
 The server speaks JSON-RPC on **stdout** and logs to **stderr**. Never write
@@ -477,7 +455,7 @@ connection.
 
 ---
 
-### Step 5 — First run
+### Step 4 — First run
 
 Ask your agent these, in order. None spends anything:
 
@@ -492,12 +470,17 @@ costs nothing and executes nothing.
 
 ### Updating and removing
 
-```bash
-# update
-cd ~/bullcheese-mcp && git pull && yarn install && yarn build
+npx caches the package after the first run. To move to a newer release, clear
+that cache and restart your client:
 
-# remove: delete the entry from your client's config, then
-rm -rf ~/bullcheese-mcp ~/.bullcheese-mcp
+```bash
+rm -rf ~/.npm/_npx
+```
+
+To remove the server, delete its entry from your client's config, then:
+
+```bash
+rm -rf ~/.bullcheese-mcp
 ```
 
 `~/.bullcheese-mcp` holds the audit database. Deleting it discards the spend
@@ -606,11 +589,28 @@ Serve several agents from one process. They share the wallet from
 BULLCHEESE_LOCAL_PRIVATE_KEY=0xYOUR_KEY \
 BULLCHEESE_AGENT_TOKENS='{"<token>":"my-agent"}' \
 BULLCHEESE_HTTP_PORT=8080 \
-node packages/mcp/dist/bin/http.js
+npx -y -p @trustswap/bullcheese-mcp bullcheese-mcp-http
 ```
 
 `POST /mcp` with `Authorization: Bearer <token>`. Any other path is 404; an
 unknown token is 401.
+
+---
+
+## Building from source
+
+Needs Git and Corepack (`corepack enable`, once) on top of Node 24:
+
+```bash
+git clone https://github.com/trustswap/bullcheese-mcp.git
+cd bullcheese-mcp
+yarn install
+yarn build
+```
+
+Then run `node packages/mcp/dist/bin/stdio.js` (or `http.js`) wherever the
+instructions above use `npx -y @trustswap/bullcheese-mcp`. In client configs,
+use the **absolute** path; no client expands `~`.
 
 ---
 
@@ -629,6 +629,17 @@ tail -50 ~/Library/Logs/Claude/mcp-server-bullcheese.log
 ```
 
 `Server started and connected successfully` means it worked.
+
+</details>
+
+<details>
+<summary><b>The first start times out</b></summary>
+
+<br>
+
+The first `npx` run downloads the package and its dependencies, which can take
+longer than a client waits. Run [Step 2](#step-2--verify-the-server-before-wiring-anything)
+once to fill npx's cache, then restart the client.
 
 </details>
 
@@ -652,12 +663,22 @@ No pinner is configured. Set `BULLCHEESE_PINATA_JWT`, or pass a pre-pinned
 </details>
 
 <details>
-<summary><b><code>node: command not found</code>, or the wrong Node version</b></summary>
+<summary><b><code>npx: command not found</code>, <code>env: node: No such file or directory</code>, or the wrong Node version</b></summary>
 
 <br>
 
-Clients don't always inherit your shell's PATH. Replace `"node"` with the
-absolute path from `which node`.
+Desktop apps don't inherit your shell's PATH, which bites most often with nvm.
+Use the absolute path from `which npx` as the command, and put Node's folder on
+the server's PATH:
+
+```json
+"command": "/Users/you/.nvm/versions/node/v24.13.0/bin/npx",
+"args": ["-y", "@trustswap/bullcheese-mcp"],
+"env": {
+  "PATH": "/Users/you/.nvm/versions/node/v24.13.0/bin:/usr/bin:/bin",
+  "BULLCHEESE_LOCAL_PRIVATE_KEY": "0xYOUR_KEY"
+}
+```
 
 </details>
 
