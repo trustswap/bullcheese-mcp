@@ -28,7 +28,7 @@
     "bundle"
   ],
   "publishConfig": {
-    "access": "restricted"
+    "access": "public"
   },
   "scripts": {
     "build": "tsc -b",
