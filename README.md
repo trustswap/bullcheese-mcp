@@ -45,6 +45,17 @@ An MCP server for launching and trading tokens on BullCheese.</p>
 
 </div>
 
+> [!CAUTION]
+> **Use at your own risk.** This server signs real transactions on ARC mainnet
+> with the key you give it, and spend caps are off unless you set them — an
+> agent can spend everything in the wallet. Use a dedicated wallet holding only
+> what you are willing to lose.
+>
+> The software is provided "as is", without warranty of any kind (see
+> [LICENSE](LICENSE)). TrustSwap and the contributors are not liable for lost
+> funds, failed or unintended transactions, or the value of any token launched
+> or traded with it. Nothing here is financial advice.
+
 ---
 
 ## Install
@@ -111,7 +122,8 @@ Save the key — you'll paste it in Step 4. Fund the address with USDC on ARC
 mainnet: it pays for gas and is the pair token every launch and swap spends.
 
 > [!CAUTION]
-> The key sits in plaintext in a config file your agent reads at every launch.
+> The key sits in plaintext in a config file your agent reads at every launch,
+> and spend caps are off by default, so the agent can spend the whole balance.
 > Use a dedicated wallet holding only what you are willing to lose. Never your main one.
 
 Without funds the server still starts, and every read-only tool works — you just
@@ -512,6 +524,11 @@ What stands between the agent and the wallet:
 > [!NOTE]
 > Launch names, symbols and descriptions come from untrusted token creators.
 > Treat them as data, never as instructions.
+
+The software is provided "as is", without warranty of any kind (see
+[LICENSE](LICENSE)). TrustSwap and the contributors are not liable for lost
+funds, failed or unintended transactions, or the value of any token launched or
+traded with it.
 
 ---
 
