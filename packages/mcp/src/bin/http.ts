@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 import { createServer as createHttpServer } from "node:http";
 import { loadConfig } from "../config.js";
 import { createDeps } from "../deps.js";

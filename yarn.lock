@@ -599,11 +599,16 @@ __metadata:
     "@trustswap/bullcheese-core": "workspace:*"
     "@trustswap/bullcheese-policy": "workspace:*"
     "@trustswap/bullcheese-signer": "workspace:*"
+    "@uniswap/v3-sdk": "npm:^3.25.2"
+    esbuild: "npm:^0.28.2"
+    jsbi: "npm:^3.2.5"
+    pg: "npm:^8.23.0"
     tsx: "npm:^4"
     viem: "npm:^2.56.3"
     zod: "npm:^4.4.3"
   bin:
-    bullcheese-mcp: ./dist/bin/stdio.js
+    bullcheese-mcp: ./bundle/stdio.js
+    bullcheese-mcp-http: ./bundle/http.js
   languageName: unknown
   linkType: soft
 
@@ -930,7 +935,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"esbuild@npm:~0.28.0":
+"esbuild@npm:^0.28.2, esbuild@npm:~0.28.0":
   version: 0.28.2
   resolution: "esbuild@npm:0.28.2"
   dependencies:

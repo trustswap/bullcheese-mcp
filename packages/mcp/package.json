@@ -1,26 +1,56 @@
 {
   "name": "@trustswap/bullcheese-mcp",
   "version": "0.1.0",
+  "description": "MCP server for AI agents to launch and trade tokens on ARC through Team Finance's MintPlus",
+  "keywords": [
+    "mcp",
+    "model-context-protocol",
+    "ai-agent",
+    "arc",
+    "token-launch",
+    "uniswap"
+  ],
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/trustswap/bullcheese-mcp.git",
+    "directory": "packages/mcp"
+  },
   "type": "module",
-  "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
-  "bin": "./dist/bin/stdio.js",
+  "engines": {
+    "node": ">=24"
+  },
+  "bin": {
+    "bullcheese-mcp": "./bundle/stdio.js",
+    "bullcheese-mcp-http": "./bundle/http.js"
+  },
+  "files": [
+    "bundle"
+  ],
+  "publishConfig": {
+    "access": "restricted"
+  },
   "scripts": {
     "build": "tsc -b",
+    "bundle": "tsc -b && node scripts/bundle.mjs",
+    "prepack": "yarn bundle",
     "start:stdio": "tsx --env-file-if-exists=../../.env src/bin/stdio.ts",
     "start:http": "tsx --env-file-if-exists=../../.env src/bin/http.ts"
   },
   "dependencies": {
     "@modelcontextprotocol/node": "2.0.0",
     "@modelcontextprotocol/server": "2.0.0",
-    "@trustswap/bullcheese-core": "workspace:*",
-    "@trustswap/bullcheese-policy": "workspace:*",
-    "@trustswap/bullcheese-signer": "workspace:*",
+    "@uniswap/v3-sdk": "^3.25.2",
+    "jsbi": "^3.2.5",
+    "pg": "^8.23.0",
     "viem": "^2.56.3",
     "zod": "^4.4.3"
   },
   "devDependencies": {
+    "@trustswap/bullcheese-core": "workspace:*",
+    "@trustswap/bullcheese-policy": "workspace:*",
+    "@trustswap/bullcheese-signer": "workspace:*",
+    "esbuild": "^0.28.2",
     "tsx": "^4"
   }
 }

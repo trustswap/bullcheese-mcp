@@ -16,5 +16,6 @@
   },
   "dependencies": {
     "viem": "^2.56.3"
-  }
+  },
+  "private": true
 }

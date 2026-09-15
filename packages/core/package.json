@@ -19,5 +19,6 @@
     "@uniswap/v3-sdk": "^3.25.2",
     "jsbi": "^3.2.5",
     "viem": "^2.56.3"
-  }
+  },
+  "private": true
 }
