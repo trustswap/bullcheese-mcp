@@ -39,7 +39,7 @@
   },
   "dependencies": {
     "@modelcontextprotocol/node": "2.0.0",
-    "@modelcontextprotocol/server": "2.0.0",
+    "@modelcontextprotocol/server": "2.3.0",
     "@uniswap/v3-sdk": "^3.25.2",
     "jsbi": "^3.2.5",
     "pg": "^8.23.0",
